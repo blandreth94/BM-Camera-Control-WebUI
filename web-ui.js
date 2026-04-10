@@ -20,9 +20,33 @@ var unsavedChanges = [];
 function bodyOnLoad() {
     defaultControlsHTML = document.getElementById("allCamerasContainer").innerHTML;
     // prefill camera hostname (or IP address)
-    document.getElementById("hostnameInput").value = localStorage.getItem("camerahostname_"+ci.toString());
+    document.getElementById("hostnameInput").value = localStorage.getItem("camerahostname_"+ci.toString()) || '';
     if ( localStorage.getItem("camerasecurity_"+ci.toString()) === 'true' ) {
-	document.getElementById("secureCheckbox").checked = true
+        document.getElementById("secureCheckbox").checked = true;
+    }
+
+    // Restore simple/advanced mode preference
+    setMode(localStorage.getItem('uiMode') || 'simple');
+
+    // If served over HTTPS (e.g. GitHub Pages), show warning and auto-check HTTPS
+    if (window.location.protocol === 'https:') {
+        document.getElementById('httpsWarning').classList.remove('dNone');
+        document.getElementById('secureCheckbox').checked = true;
+    }
+}
+
+// Toggle simple / advanced mode
+function setMode(mode) {
+    document.body.setAttribute('data-mode', mode);
+    document.getElementById('btnSimple').classList.toggle('active', mode === 'simple');
+    document.getElementById('btnAdvanced').classList.toggle('active', mode === 'advanced');
+    localStorage.setItem('uiMode', mode);
+}
+
+// Called when Use HTTPS checkbox changes — re-show banner if unchecked on HTTPS page
+function httpsCheckboxChanged() {
+    if (window.location.protocol === 'https:' && !document.getElementById('secureCheckbox').checked) {
+        document.getElementById('httpsWarning').classList.remove('dNone');
     }
 }
 
